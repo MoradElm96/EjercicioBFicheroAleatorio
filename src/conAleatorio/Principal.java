@@ -1,3 +1,5 @@
+package conAleatorio;
+
 
 import java.io.EOFException;
 import java.io.File;
