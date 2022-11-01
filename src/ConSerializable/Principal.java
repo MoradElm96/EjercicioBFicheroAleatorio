@@ -14,8 +14,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 /**
  * Crea una aplicación que almacene los datos básicos de un vehículo como la
@@ -33,7 +32,7 @@ public class Principal {
     private static Double tamanioDeposito;
     private static String modelo;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, FileNotFoundException, ClassNotFoundException {
         Scanner sc = new Scanner(System.in);
         File f = new File("datosAutomovilSerializable.dat");
         Automovil auto = null;
@@ -42,14 +41,16 @@ public class Principal {
 
         opcion = Menu(sc);
 
-        while (opcion != 3) {
+        while (opcion != 4) {
             switch (opcion) {
                 case 1:
-                    escribir(f, sc, auto);
+                   crearFichero(f);
                     break;
                 case 2:
-                    leer(f, auto);
+                    escribir(f, sc, auto);
                     break;
+                case 3:
+                     leer(f);
                 default:
                     System.out.println("Operacion Incorrecta");
                     break;
@@ -58,75 +59,74 @@ public class Principal {
         }
     }
 
-    public static int Menu(Scanner sc) {
+    private static int Menu(Scanner sc) {
         int opcion;
-        System.out.println("1)Añadir vehiculos");
-        System.out.println("2)Mostrar informacion");
-        System.out.println("3)Salir");
+        System.out.println("1)Crear fichero");
+        System.out.println("2)Añadir vehiculos");
+        System.out.println("3)Mostrar informacion");
+        System.out.println("4)Salir");
 
         opcion = sc.nextInt();
 
         return opcion;
     }
 
-    public static void escribir(File f, Scanner sc, Automovil auto) {
+    private static void escribir(File f, Scanner sc, Automovil auto) throws IOException {
 
-        try {
-
-            System.out.println("Introduce matricula");
-            matricula = sc.next();
-            System.out.println("Introduce marca");
-            marca = sc.next();
-            System.out.println("Introduce tamaño del deposito");
-            tamanioDeposito = sc.nextDouble();
-            System.out.println("Introduce el modelo");
-            modelo = sc.next();
-
-            auto = new Automovil(matricula, marca, tamanioDeposito, modelo);
-
-            FileOutputStream fos = new FileOutputStream(f, true);
-            //para la cabecera
-            ClaseOutput oos = new ClaseOutput(fos);
-
-            oos.writeObject(auto);
-
-            oos.close();
-
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        if(!f.exists())
+            crearFichero(f);
+        
+        FileOutputStream fos = new FileOutputStream(f,true);
+        ClaseOutput oos = new ClaseOutput(fos);
+        
+        System.out.println("Introduce matricula");
+        matricula = sc.next();
+        System.out.println("Introduce marca");
+        marca = sc.next();
+        System.out.println("Introduce tamaño del deposito");
+        tamanioDeposito = sc.nextDouble();
+        System.out.println("Introduce el modelo");
+        modelo = sc.next();
+        
+        auto = new Automovil(matricula, marca, tamanioDeposito, modelo);
+        oos.writeObject(auto);
+        oos.close();
+        fos.close();
 
     }
 
-    public static void leer(File f, Automovil auto) {
+    private static void leer(File f) throws FileNotFoundException, IOException, ClassNotFoundException {
 
-        try {
-
-            FileInputStream fis = new FileInputStream(f);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-
-            try {
-                while (true) {
-
-                    auto = (Automovil) ois.readObject();
-                    System.out.println(auto.toString());
-
-                }
-
-            } catch (EOFException e) {
-                System.out.println("Fin Del Fichero");
+        Automovil auto;
+        FileInputStream fis = new FileInputStream(f);
+        ObjectInputStream ois = new ObjectInputStream(fis);
+        
+        try{
+            while(true){
+                auto= (Automovil)ois.readObject();
+                System.out.println(auto.toString());
             }
+            
+        }catch(EOFException e){System.out.println("Fin del fichero");}
+        
+        
+        
+        
+    }
 
-            ois.close();
-            fis.close();
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(Principal.class.getName()).log(Level.SEVERE, null, ex);
+    
+    
+    private static void crearFichero(File f) throws FileNotFoundException, IOException {
+
+        if(f.exists()){
+            System.out.println("El fichero ya esta creado");
+        }else{
+            FileOutputStream fos = new FileOutputStream(f);
+            ObjectOutputStream oos= new ObjectOutputStream(fos);
+            System.out.println("fichero creado");
+            oos.close();
+            fos.close();
+            
         }
 
     }

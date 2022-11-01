@@ -17,6 +17,8 @@ import java.io.Serializable;
  */
 public class Automovil implements Serializable {
     
+    private static final long serialVersionUID = 1L;// como un id
+    
     private String matricula;
     private String marca;
     private Double tamanioDeposito;
